@@ -59,6 +59,7 @@ url_array = ["https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/Applicat
 agent = Mechanize.new
 
 url_array.each {|url|
+  puts "Starting to scrape."
   # Read in a page
   page = agent.get(url)
 
@@ -70,4 +71,5 @@ url_array.each {|url|
   page = form.submit(button)
   page = agent.get(url)
 
-  scrape_and_follow_next_link(page) }
+  scrape_and_follow_next_link(page)
+  puts "URL scraped successfully."}
