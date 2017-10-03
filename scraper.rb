@@ -61,7 +61,6 @@ periodstrs.each {|periodstr|
   puts "Getting data in `" + periodstr + "`."
 
   url = "https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found" + period + "&4a=&6=F"
-  comment_url = "mailto:council@logan.qld.gov.au"
 
   agent = Mechanize.new
   # Read in a page
