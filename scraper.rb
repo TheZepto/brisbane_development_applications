@@ -21,8 +21,8 @@ def scrape_page(page)
     #p record
     if (ScraperWiki.select("* from data where `council_reference`='#{record['council_reference']}'").empty? rescue true)
       ScraperWiki.save_sqlite(['council_reference'], record)
-    else
-      puts "Skipping already saved record " + record['council_reference']
+#     else
+#       puts "Skipping already saved record " + record['council_reference']
     end
   end
 end
@@ -75,6 +75,7 @@ periodstrs.each {|periodstr|
   next_page_link = true
 
   while next_page_link
+    if (current_page_no%5).zero
     puts "Scraping page #{current_page_no}..."
     scrape_page(page)
 
