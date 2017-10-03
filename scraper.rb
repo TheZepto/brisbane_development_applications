@@ -5,27 +5,28 @@ require 'scraperwiki'
 require 'mechanize'
 require 'date'
 
-def scrape_page(page, comment_url)
-  page.at("table.rgMasterTable").search("tr.rgRow,tr.rgAltRow").each do |tr|
-    tds = tr.search('td').map{|t| t.inner_html.gsub("\r\n", "").strip}
-    day, month, year = tds[2].split("/").map{|s| s.to_i}
+def scrape_page(page)
+  page.at("table#ctl00_cphContent_ctl01_ctl00_RadGrid1_ctl00 tbody").search("tr").each do |tr|
+    tds = tr.search('td').map{|t| t.inner_text.gsub("\r\n", "").strip}
+    day, month, year = tds[3].split("/").map{|s| s.to_i}
     record = {
       "info_url" => (page.uri + tr.search('td').at('a')["href"]).to_s,
-      "council_reference" => tds[1],
+      "council_reference" => tds[1].split(" - ")[0].squeeze(" ").strip,
       "date_received" => Date.new(year, month, day).to_s,
-      "description" => tds[3].gsub("&amp;", "&").split("<br>")[1].to_s.squeeze(" ").strip,
-      "address" => tds[3].gsub("&amp;", "&").split("<br>")[0].gsub("\r", " ").gsub("<strong>","").gsub("</strong>","").squeeze(" ").strip,
+      "description" => tds[1].split(" - ")[1..-1].join(" - ").squeeze(" ").strip,
+      "address" => tds[2].squeeze(" ").strip,
       "date_scraped" => Date.today.to_s
     }
+    record["comment_url"] = "https://sde.brisbane.qld.gov.au/services/startDASubmission.do?direct=true&daNumber=" + CGI.escape(record["council_reference"]) + "&sdeprop=" + CGI.escape(record["address"])
+    #p record
     if (ScraperWiki.select("* from data where `council_reference`='#{record['council_reference']}'").empty? rescue true)
-      puts "Saving record " + record['council_reference'] + " - " + record['address']
-#      puts record
       ScraperWiki.save_sqlite(['council_reference'], record)
     else
       puts "Skipping already saved record " + record['council_reference']
     end
   end
 end
+
 
 # Implement a click on a link that understands stupid asp.net doPostBack
 def click(page, doc)
@@ -75,7 +76,7 @@ periodstrs.each {|periodstr|
 
   while next_page_link
     puts "Scraping page #{current_page_no}..."
-    scrape_page(page, comment_url)
+    scrape_page(page)
 
     current_page_no += 1
     next_page_link = page.at(".rgPageNext")
