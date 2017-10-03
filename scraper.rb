@@ -49,17 +49,21 @@ def scrape_and_follow_next_link(page)
   end
 end
 
-url_array = ["https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found&1=01/01/2007&2=01/01/2017",
-  "https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found&1=01/01/2009&2=01/01/2017",
-  "https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found&1=01/01/2011&2=01/01/2017",
-  "https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found&1=01/01/2013&2=01/01/2017",
-  "https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found&1=01/01/2015&2=01/01/2017",
-  "https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found&1=01/01/2017&2=27/09/2017"]
+years = [2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009, 2008, 2007]
+periodstrs = years.map(&:to_s).product([*'-01'..'-12'].reverse).map(&:join).select{|d| d <= Date.today.to_s[0..-3]}
 
-agent = Mechanize.new
+periodstrs.each {|periodstr| 
+  
+  matches = periodstr.scan(/^([0-9]{4})-(0[1-9]|1[0-2])$/)
+  period = "&1=" + Date.new(matches[0][0].to_i, matches[0][1].to_i, 1).strftime("%d/%m/%Y")
+  period = period + "&2=" + Date.new(matches[0][0].to_i, matches[0][1].to_i, -1).strftime("%d/%m/%Y")
+  
+  puts "Getting data in `" + periodstr + "`."
 
-url_array.each {|url|
-  puts "Starting to scrape."
+  url = "https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found" + period + "&4a=&6=F"
+  comment_url = "mailto:council@logan.qld.gov.au"
+
+  agent = Mechanize.new
   # Read in a page
   page = agent.get(url)
 
@@ -71,5 +75,4 @@ url_array.each {|url|
   page = form.submit(button)
   page = agent.get(url)
 
-  scrape_and_follow_next_link(page)
-  puts "URL scraped successfully."}
+  scrape_and_follow_next_link(page)}
