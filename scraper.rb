@@ -76,7 +76,8 @@ periodstrs.each {|periodstr|
 
   while next_page_link
     if (current_page_no%5).zero
-    puts "Scraping page #{current_page_no}..."
+      puts "Scraping page #{current_page_no}..."
+    end
     scrape_page(page)
 
     current_page_no += 1
