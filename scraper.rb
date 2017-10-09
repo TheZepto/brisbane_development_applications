@@ -34,19 +34,23 @@ end
 
 # Implement a click on a link that understands stupid asp.net doPostBack
 def click(page, doc)
-  js = doc["href"] || doc["onclick"]
-  if js =~ /javascript:__doPostBack\('(.*)','(.*)'\)/
-    event_target = $1
-    event_argument = $2
-    form = page.form_with(id: "aspnetForm")
-    form["__EVENTTARGET"] = event_target
-    form["__EVENTARGUMENT"] = event_argument
-    form.submit
-  elsif js =~ /return false;__doPostBack\('(.*)','(.*)'\)/
+  begin
+    js = doc["href"] || doc["onclick"]
+    if js =~ /javascript:__doPostBack\('(.*)','(.*)'\)/
+      event_target = $1
+      event_argument = $2
+      form = page.form_with(id: "aspnetForm")
+      form["__EVENTTARGET"] = event_target
+      form["__EVENTARGUMENT"] = event_argument
+      form.submit
+    elsif js =~ /return false;__doPostBack\('(.*)','(.*)'\)/
+      nil
+    else
+      # TODO Just follow the link likes it's a normal link
+      raise
+    end
+  rescue
     nil
-  else
-    # TODO Just follow the link likes it's a normal link
-    raise
   end
 end
 
