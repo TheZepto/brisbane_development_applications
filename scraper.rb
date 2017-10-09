@@ -27,7 +27,7 @@ def scrape_page(page)
       end
     end
   rescue
-    next
+    puts 'Nothing here.'
   end
 end
 
