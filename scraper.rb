@@ -6,8 +6,8 @@ require 'mechanize'
 require 'date'
 
 def scrape_page(page)
-  begin
-    page.at("table#ctl00_cphContent_ctl01_ctl00_RadGrid1_ctl00 tbody").search("tr").each do |tr|
+  page.at("table#ctl00_cphContent_ctl01_ctl00_RadGrid1_ctl00 tbody").search("tr").each do |tr|
+    begin
       tds = tr.search('td').map{|t| t.inner_text.gsub("\r\n", "").strip}
       day, month, year = tds[3].split("/").map{|s| s.to_i}
       record = {
@@ -22,12 +22,12 @@ def scrape_page(page)
       #p record
       if (ScraperWiki.select("* from data where `council_reference`='#{record['council_reference']}'").empty? rescue true)
         ScraperWiki.save_sqlite(['council_reference'], record)
-#       else
-#         puts "Skipping already saved record " + record['council_reference']
+  #         else
+  #           puts "Skipping already saved record " + record['council_reference']
       end
+    rescue
+      next
     end
-  rescue
-    puts 'Nothing here.'
   end
 end
 
