@@ -18,8 +18,6 @@ def scrape_page(page)
         "address" => tds[2].squeeze(" ").strip,
         "date_scraped" => Date.today.to_s
       }
-      record["comment_url"] = "https://sde.brisbane.qld.gov.au/services/startDASubmission.do?direct=true&daNumber=" + CGI.escape(record["council_reference"]) + "&sdeprop=" + CGI.escape(record["address"])
-      #p record
       if (ScraperWiki.select("* from data where `council_reference`='#{record['council_reference']}'").empty? rescue true)
         ScraperWiki.save_sqlite(['council_reference'], record)
   #         else
@@ -69,7 +67,6 @@ url_ends.each {|url_end|
     puts "Getting data in `" + periodstr + "`."
 
     url = "https://pdonline.brisbane.qld.gov.au/MasterViewUI/Modules/ApplicationMaster/default.aspx?page=found" + period + url_end
-    comment_url = "mailto:council@logan.qld.gov.au"
 
     agent = Mechanize.new
 
